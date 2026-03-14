@@ -7,8 +7,8 @@
       "description": "Instead of letting the model plan silently in its chain-of-thought, we force plans to be externalized through the TodoWrite tool. Each plan item has a status (pending, in_progress, completed) that gets tracked explicitly. This has three benefits: (1) users can see what the agent intends to do before it does it, (2) developers can debug agent behavior by inspecting the plan state, (3) the agent itself can refer back to its plan in later turns when earlier context has scrolled away.",
       "alternatives": "The model could plan internally via chain-of-thought reasoning (as it does in v0/v1). Internal planning works but is invisible and ephemeral -- once the thinking scrolls out of context, the plan is lost. Claude's extended thinking is another option, but it's not inspectable by the user or by downstream tools.",
       "zh": {
-        "title": "通过 TodoWrite 让计划可见",
-        "description": "我们不让模型在思维链中默默规划，而是强制通过 TodoWrite 工具将计划外化。每个计划项都有可追踪的状态（pending、in_progress、completed）。这有三个好处：(1) 用户可以在执行前看到 agent 打算做什么；(2) 开发者可以通过检查计划状态来调试 agent 行为；(3) agent 自身可以在后续轮次中引用计划，即使早期上下文已经滚出窗口。"
+        "title": "透過 TodoWrite 讓計畫可見",
+        "description": "我們不讓模型在思維鏈中默默規劃，而是強制透過 TodoWrite 工具將計畫外化。每個計畫項都有可追蹤的狀態（pending、in_progress、completed）。這有三個好處：(1) 使用者可以在執行前看到 agent 打算做什麼；(2) 開發者可以透過檢查計畫狀態來除錯 agent 行為；(3) agent 自身可以在後續輪次中引用計畫，即使早期上下文已經滾出視窗。"
       },
       "ja": {
         "title": "TodoWrite による計画の可視化",
@@ -21,8 +21,8 @@
       "description": "The TodoWrite tool enforces that at most one task has status 'in_progress' at any time. If the model tries to start a second task, it must first complete or abandon the current one. This constraint prevents a subtle failure mode: models that try to 'multitask' by interleaving work on multiple items tend to lose track of state and produce half-finished results. Sequential focus produces higher quality than parallel thrashing.",
       "alternatives": "Allowing multiple in-progress items would let the agent context-switch between tasks, which seems more flexible. In practice, LLMs handle context-switching poorly -- they lose track of which task they were working on and mix up details between tasks. The single-focus constraint is a guardrail that improves output quality.",
       "zh": {
-        "title": "同一时间只允许一个任务进行中",
-        "description": "TodoWrite 工具强制要求任何时候最多只能有一个任务处于 in_progress 状态。如果模型想开始第二个任务，必须先完成或放弃当前任务。这个约束防止了一种隐蔽的失败模式：试图通过交替处理多个项目来'多任务'的模型，往往会丢失状态并产出半成品。顺序执行的专注度远高于并行切换。"
+        "title": "同一時間只允許一個任務進行中",
+        "description": "TodoWrite 工具強制要求任何時候最多只能有一個任務處於 in_progress 狀態。如果模型想開始第二個任務，必須先完成或放棄當前任務。這個約束防止了一種隱蔽的失敗模式：試圖透過交替處理多個項目來「多工」的模型，往往會丟失狀態並產出半成品。順序執行的專注度遠高於並行切換。"
       },
       "ja": {
         "title": "同時に進行中にできるタスクは1つだけ",
@@ -35,8 +35,8 @@
       "description": "TodoWrite caps the plan at 20 items. This is a deliberate constraint against over-planning. Models tend to decompose tasks into increasingly fine-grained steps when unconstrained, producing 50-item plans where each step is trivial. Long plans are fragile: if step 15 fails, the remaining 35 steps may all be invalid. Short plans (under 20 items) stay at the right abstraction level and are easier to adapt when reality diverges from the plan.",
       "alternatives": "No cap would give the model full flexibility, but in practice leads to absurdly detailed plans. A dynamic cap (proportional to task complexity) would be smarter but adds complexity. The fixed cap of 20 is a simple heuristic that works well empirically -- most real coding tasks can be expressed in 5-15 meaningful steps.",
       "zh": {
-        "title": "计划项上限为 20 条",
-        "description": "TodoWrite 将计划项限制在 20 条以内。这是对过度规划的刻意约束。不加限制时，模型倾向于将任务分解成越来越细粒度的步骤，产出 50 条的计划，每一步都微不足道。冗长的计划很脆弱：如果第 15 步失败，剩下的 35 步可能全部作废。20 条以内的短计划保持在正确的抽象层级，更容易在现实偏离计划时做出调整。"
+        "title": "計畫項上限為 20 條",
+        "description": "TodoWrite 將計畫項限制在 20 條以內。這是對過度規劃的刻意約束。不加限制時，模型傾向於將任務分解成越來越細粒度的步驟，產出 50 條的計畫，每一步都微不足道。冗長的計畫很脆弱：如果第 15 步失敗，剩下的 35 步可能全部作廢。20 條以內的短計畫保持在正確的抽象層級，更容易在現實偏離計畫時做出調整。"
       },
       "ja": {
         "title": "計画項目の上限は20個",

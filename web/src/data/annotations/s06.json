@@ -7,8 +7,8 @@
       "description": "Context management uses three distinct layers, each with different cost/benefit profiles. (1) Microcompact runs every turn and is nearly free: it truncates tool_result blocks from older messages, stripping verbose command output that's no longer needed. (2) Auto_compact triggers when token count exceeds a threshold: it calls the LLM to generate a conversation summary, which is expensive but dramatically reduces context size. (3) Manual compact is user-triggered for explicit 'start fresh' moments. Layering these means the cheap operation runs constantly (keeping context tidy) while the expensive operation runs rarely (only when actually needed).",
       "alternatives": "A single compression strategy (e.g., always summarize at 80% capacity) would be simpler but wasteful -- most of the time, microcompact alone keeps things manageable. A sliding window (drop oldest N messages) is cheap but loses important context. The three-layer approach gives the best token efficiency: cheap cleanup constantly, expensive summarization rarely.",
       "zh": {
-        "title": "三层压缩策略",
-        "description": "上下文管理使用三个独立的层次，各有不同的成本收益比。(1) 微压缩每轮都运行，几乎零成本：它截断旧消息中的 tool_result 块，去除不再需要的冗长命令输出。(2) 自动压缩在 token 数超过阈值时触发：调用 LLM 生成对话摘要，代价高但能大幅缩减上下文。(3) 手动压缩由用户触发，用于明确的'重新开始'场景。分层意味着低成本操作持续运行（保持上下文整洁），而高成本操作很少触发（仅在真正需要时）。"
+        "title": "三層壓縮策略",
+        "description": "上下文管理使用三個獨立的層次，各有不同的成本收益比。(1) 微壓縮每輪都運行，幾乎零成本：它截斷舊訊息中的 tool_result 區塊，去除不再需要的冗長命令輸出。(2) 自動壓縮在 token 數超過閾值時觸發：呼叫 LLM 產生對話摘要，代價高但能大幅縮減上下文。(3) 手動壓縮由使用者觸發，用於明確的「重新開始」場景。分層意味著低成本操作持續運行（保持上下文整潔），而高成本操作很少觸發（僅在真正需要時）。"
       },
       "ja": {
         "title": "3層圧縮戦略",
@@ -21,8 +21,8 @@
       "description": "Auto_compact only triggers when the estimated savings (current tokens minus estimated summary size) exceed 20,000 tokens. Compression is not free: the summary itself consumes tokens, plus there's the API call cost to generate it. If the conversation is only 25,000 tokens, compressing might save 5,000 tokens but cost an API call and produce a summary that's less coherent than the original. The 20K threshold ensures compression only happens when the savings meaningfully exceed the overhead.",
       "alternatives": "A percentage-based threshold (compress when context is 80% full) adapts to different context window sizes but doesn't account for the fixed cost of generating a summary. A fixed threshold of 10K would compress more aggressively but often isn't worth it. The 20K value was chosen empirically: it's the point where compression savings consistently outweigh the quality loss from summarization.",
       "zh": {
-        "title": "最小节省量 = 20,000 Token 才触发压缩",
-        "description": "自动压缩仅在估算节省量（当前 token 数减去预估摘要大小）超过 20,000 token 时才触发。压缩不是免费的：摘要本身会消耗 token，还有生成摘要的 API 调用成本。如果对话只有 25,000 token，压缩可能节省 5,000 token，但需要一次 API 调用，且产出的摘要可能不如原文连贯。20K 的阈值确保只在节省量明显超过开销时才进行压缩。"
+        "title": "最小節省量 = 20,000 Token 才觸發壓縮",
+        "description": "自動壓縮僅在估算節省量（當前 token 數減去預估摘要大小）超過 20,000 token 時才觸發。壓縮不是免費的：摘要本身會消耗 token，還有產生摘要的 API 呼叫成本。如果對話只有 25,000 token，壓縮可能節省 5,000 token，但需要一次 API 呼叫，且產出的摘要可能不如原文連貫。20K 的閾值確保只在節省量明顯超過開銷時才進行壓縮。"
       },
       "ja": {
         "title": "圧縮前に MIN_SAVINGS = 20,000 トークンが必要",
@@ -35,8 +35,8 @@
       "description": "When auto_compact fires, it generates a summary and replaces the ENTIRE message history with that summary. It does not keep the last N messages alongside the summary. This avoids a subtle coherence problem: if you keep recent messages plus a summary of older ones, the model sees two representations of overlapping content. The summary might say 'we decided to use approach X' while a recent message still shows the deliberation process, creating contradictory signals. A clean summary is a single coherent narrative.",
       "alternatives": "Keeping the last 5-10 messages alongside the summary preserves recent detail and gives the model more to work with. But it creates the overlap problem described above, and makes the total context size less predictable. Some systems use a 'sliding window + summary' approach which works but requires careful tuning of the overlap region.",
       "zh": {
-        "title": "摘要替换全部消息，而非保留部分历史",
-        "description": "自动压缩触发时，生成摘要并替换全部消息历史，不会在摘要旁保留最近的 N 条消息。这避免了一个微妙的连贯性问题：如果同时保留近期消息和旧消息的摘要，模型会看到重叠内容的两种表示。摘要可能说'我们决定使用方案 X'，而近期消息仍在展示讨论过程，产生矛盾信号。干净的摘要是一个连贯的单一叙述。"
+        "title": "摘要替換全部訊息，而非保留部分歷史",
+        "description": "自動壓縮觸發時，產生摘要並替換全部訊息歷史，不會在摘要旁保留最近的 N 條訊息。這避免了一個微妙的連貫性問題：如果同時保留近期訊息和舊訊息的摘要，模型會看到重疊內容的兩種表示。摘要可能說「我們決定使用方案 X」，而近期訊息仍在展示討論過程，產生矛盾訊號。乾淨的摘要是一個連貫的單一敘述。"
       },
       "ja": {
         "title": "要約が部分的な履歴ではなく全メッセージを置換",
@@ -49,8 +49,8 @@
       "description": "Even though context is compressed in memory, the full uncompressed conversation is appended to a JSONL file on disk. Every message, every tool call, every result -- nothing is lost. This means compression is a lossy operation on the in-memory context but a lossless operation on the permanent record. Post-hoc analysis (debugging agent behavior, computing token usage, training data extraction) can always work from the complete transcript. The JSONL format is append-only, making it safe for concurrent writes and easy to stream-process.",
       "alternatives": "Not archiving saves disk space but makes debugging hard -- when the agent makes a mistake, you can't see what it was 'thinking' 200 messages ago because that context was compressed away. Database storage (SQLite) would provide queryability but adds a dependency. JSONL is the simplest format that supports append-only writes and line-by-line processing.",
       "zh": {
-        "title": "完整对话以 JSONL 格式归档到磁盘",
-        "description": "尽管上下文在内存中被压缩，完整的未压缩对话仍会追加到磁盘上的 JSONL 文件中。每条消息、每次工具调用、每个结果都不会丢失。压缩对内存上下文是有损操作，但对永久记录是无损的。事后分析（调试 agent 行为、计算 token 用量、提取训练数据）始终可以基于完整记录进行。JSONL 格式仅追加写入，对并发写入安全，易于流式处理。"
+        "title": "完整對話以 JSONL 格式歸檔到磁碟",
+        "description": "儘管上下文在記憶體中被壓縮，完整的未壓縮對話仍會追加到磁碟上的 JSONL 檔案中。每條訊息、每次工具呼叫、每個結果都不會丟失。壓縮對記憶體上下文是有損操作，但對永久記錄是無損的。事後分析（除錯 agent 行為、計算 token 用量、提取訓練資料）始終可以基於完整記錄進行。JSONL 格式僅追加寫入，對並行寫入安全，易於串流處理。"
       },
       "ja": {
         "title": "完全な会話を JSONL としてディスクに保存",

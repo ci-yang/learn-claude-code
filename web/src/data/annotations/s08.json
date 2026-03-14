@@ -7,8 +7,8 @@
       "description": "Background task results are delivered via a threading.Queue instead of direct callbacks. The background thread puts a notification on the queue when its work completes. The main agent loop polls the queue before each LLM call. This decoupling is important: the background thread doesn't need to know anything about the main loop's state or timing. It just drops a message on the queue and moves on. The main loop picks it up at its own pace -- never mid-API-call, never mid-tool-execution. No race conditions, no callback hell.",
       "alternatives": "Direct callbacks (background thread calls a function in the main thread) would deliver results faster but create thread-safety issues -- the callback might fire while the main thread is in the middle of building a request. Event-driven systems (asyncio, event emitters) work but add complexity. A queue is the simplest thread-safe communication primitive.",
       "zh": {
-        "title": "用 threading.Queue 作为通知总线",
-        "description": "后台任务结果通过 threading.Queue 传递，而非直接回调。后台线程在工作完成时向队列放入通知，主 agent 循环在每次 LLM 调用前轮询队列。这种解耦很重要：后台线程无需了解主循环的状态或时序，只需往队列放入消息然后继续。主循环按自己的节奏取出消息——永远不会在 API 调用中途或工具执行中途。没有竞争条件，没有回调地狱。"
+        "title": "用 threading.Queue 作為通知匯流排",
+        "description": "背景任務結果透過 threading.Queue 傳遞，而非直接回呼。背景執行緒在工作完成時向佇列放入通知，主 agent 迴圈在每次 LLM 呼叫前輪詢佇列。這種解耦很重要：背景執行緒無需了解主迴圈的狀態或時序，只需往佇列放入訊息然後繼續。主迴圈按自己的節奏取出訊息——永遠不會在 API 呼叫中途或工具執行中途。沒有競爭條件，沒有回呼地獄。"
       },
       "ja": {
         "title": "threading.Queue を通知バスとして使用",
@@ -21,8 +21,8 @@
       "description": "Background task threads are created with daemon=True. In Python, daemon threads are killed automatically when the main thread exits. This prevents a common problem: if the main agent completes its work and exits, but a background thread is still running (waiting on a long API call, stuck in a loop), the process would hang indefinitely. With daemon threads, exit is clean -- the main thread finishes, all daemon threads die, process exits. No zombie processes, no cleanup code needed.",
       "alternatives": "Non-daemon threads with explicit cleanup (join with timeout, then terminate) give more control over shutdown but require careful lifecycle management. Process-based parallelism (multiprocessing) provides stronger isolation but higher overhead. Daemon threads are the pragmatic choice: minimal code, correct behavior in the common case.",
       "zh": {
-        "title": "后台任务以守护线程运行",
-        "description": "后台任务线程以 daemon=True 创建。在 Python 中，守护线程在主线程退出时自动被终止。这防止了一个常见问题：如果主 agent 完成工作并退出，但后台线程仍在运行（等待一个长时间 API 调用或陷入循环），进程会无限挂起。使用守护线程，退出是干净的——主线程结束，所有守护线程自动终止，进程退出。没有僵尸进程，不需要清理代码。"
+        "title": "背景任務以守護執行緒運行",
+        "description": "背景任務執行緒以 daemon=True 建立。在 Python 中，守護執行緒在主執行緒退出時自動被終止。這防止了一個常見問題：如果主 agent 完成工作並退出，但背景執行緒仍在運行（等待一個長時間 API 呼叫或陷入迴圈），程序會無限掛起。使用守護執行緒，退出是乾淨的——主執行緒結束，所有守護執行緒自動終止，程序退出。沒有僵屍程序，不需要清理程式碼。"
       },
       "ja": {
         "title": "バックグラウンドタスクはデーモンスレッドとして実行",
@@ -35,8 +35,8 @@
       "description": "Notifications from background tasks use a structured format: {\"type\": \"attachment\", \"attachment\": {status, result, ...}} instead of plain text strings. The type tag lets the main loop handle different notification types differently: an 'attachment' might be injected into the conversation as a tool_result, while a 'status_update' might just update a progress indicator. Machine-readable notifications also enable programmatic filtering (show only errors, suppress progress updates) and UI rendering (display status as a progress bar, not raw text).",
       "alternatives": "Plain text notifications are simpler but lose structure. The main loop would have to parse free-form text to determine what happened, which is fragile. A class hierarchy (StatusNotification, ResultNotification, ErrorNotification) is more Pythonic but less portable -- JSON structures work the same way regardless of language or serialization format.",
       "zh": {
-        "title": "带类型标签的结构化通知格式",
-        "description": "后台任务的通知使用结构化格式：{\"type\": \"attachment\", \"attachment\": {status, result, ...}}，而非纯文本字符串。类型标签让主循环可以区别处理不同通知类型：attachment 可能作为 tool_result 注入对话，而 status_update 可能只更新进度指示器。机器可读的通知还支持程序化过滤（只显示错误、抑制进度更新）和 UI 渲染（将状态显示为进度条而非原始文本）。"
+        "title": "帶類型標籤的結構化通知格式",
+        "description": "背景任務的通知使用結構化格式：{\"type\": \"attachment\", \"attachment\": {status, result, ...}}，而非純文字字串。類型標籤讓主迴圈可以區別處理不同通知類型：attachment 可能作為 tool_result 注入對話，而 status_update 可能只更新進度指示器。機器可讀的通知還支援程式化過濾（只顯示錯誤、抑制進度更新）和 UI 渲染（將狀態顯示為進度條而非原始文字）。"
       },
       "ja": {
         "title": "型タグ付き構造化通知フォーマット",

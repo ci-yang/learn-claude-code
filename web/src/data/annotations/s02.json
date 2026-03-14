@@ -7,8 +7,8 @@
       "description": "The four tools are bash, read_file, write_file, and edit_file. Together they cover roughly 95% of coding tasks. Bash handles execution and arbitrary commands. Read_file provides precise file reading with line numbers. Write_file creates or overwrites files. Edit_file does surgical string replacement. More tools would increase the model's cognitive load -- it has to decide which tool to use, and more options means more chances of picking the wrong one. Fewer tools also means fewer tool schemas to maintain and fewer edge cases to handle.",
       "alternatives": "We could add specialized tools (list_directory, search_files, http_request), and later versions do. But at this stage, bash already covers those use cases. The split from v0's single tool to v1's four tools is specifically about giving the model structured I/O for file operations, where bash's quoting and escaping often trips up the model.",
       "zh": {
-        "title": "为什么恰好四个工具",
-        "description": "四个工具分别是 bash、read_file、write_file 和 edit_file，覆盖了大约 95% 的编程任务。Bash 处理执行和任意命令；read_file 提供带行号的精确文件读取；write_file 创建或覆盖文件；edit_file 做精确的字符串替换。工具越多，模型的认知负担越重——它必须在更多选项中做选择，选错的概率也随之增加。更少的工具也意味着更少的 schema 需要维护、更少的边界情况需要处理。"
+        "title": "為什麼恰好四個工具",
+        "description": "四個工具分別是 bash、read_file、write_file 和 edit_file，涵蓋了大約 95% 的程式設計任務。Bash 處理執行和任意命令；read_file 提供帶行號的精確檔案讀取；write_file 建立或覆寫檔案；edit_file 做精確的字串替換。工具越多，模型的認知負擔越重——它必須在更多選項中做選擇，選錯的機率也隨之增加。更少的工具也意味著更少的 schema 需要維護、更少的邊界情況需要處理。"
       },
       "ja": {
         "title": "なぜ正確に4つのツールなのか",
@@ -22,7 +22,7 @@
       "alternatives": "Many agent frameworks add elaborate orchestration layers: ReAct loops with explicit Thought/Action/Observation parsing, LangChain-style chains, AutoGPT-style goal decomposition. These frameworks assume the model needs scaffolding to behave as an agent. Our approach assumes the model already knows how to be an agent -- it just needs tools to act on the world.",
       "zh": {
         "title": "模型本身就是代理",
-        "description": "核心 agent 循环极其简单：不断调用 LLM，如果返回 tool_use 块就执行并回传结果，如果只返回文本就停止。没有路由器，没有决策树，没有工作流引擎。模型自己决定做什么、何时停止、如何从错误中恢复。代码只是连接模型和工具的管道。这是一种设计哲学：agent 行为从模型中涌现，而非由框架定义。"
+        "description": "核心 agent 迴圈極其簡單：不斷呼叫 LLM，如果回傳 tool_use 區塊就執行並回傳結果，如果只回傳文字就停止。沒有路由器，沒有決策樹，沒有工作流引擎。模型自己決定做什麼、何時停止、如何從錯誤中恢復。程式碼只是連接模型和工具的管道。這是一種設計哲學：agent 行為從模型中湧現，而非由框架定義。"
       },
       "ja": {
         "title": "モデルそのものがエージェント",
@@ -35,8 +35,8 @@
       "description": "Each tool defines a strict JSON schema for its input parameters. For example, edit_file requires old_string and new_string as exact strings, not regex patterns. This eliminates an entire class of bugs: the model can't pass malformed input because the API validates against the schema before execution. It also makes the model's intent unambiguous -- when it calls edit_file with specific strings, there's no parsing ambiguity about what it wants to change.",
       "alternatives": "Some agent systems let the model output free-form text that gets parsed with regex or heuristics (e.g., extracting code from markdown blocks). This is fragile -- the model might format output slightly differently and break the parser. JSON schemas trade flexibility for reliability.",
       "zh": {
-        "title": "每个工具都有 JSON Schema",
-        "description": "每个工具都为输入参数定义了严格的 JSON schema。例如，edit_file 要求 old_string 和 new_string 是精确的字符串，而非正则表达式。这消除了一整类错误：模型无法传递格式错误的输入，因为 API 会在执行前校验 schema。这也使模型的意图变得明确——当它用特定字符串调用 edit_file 时，不存在关于它想修改什么的解析歧义。"
+        "title": "每個工具都有 JSON Schema",
+        "description": "每個工具都為輸入參數定義了嚴格的 JSON schema。例如，edit_file 要求 old_string 和 new_string 是精確的字串，而非正規表達式。這消除了一整類錯誤：模型無法傳遞格式錯誤的輸入，因為 API 會在執行前校驗 schema。這也使模型的意圖變得明確——當它用特定字串呼叫 edit_file 時，不存在關於它想修改什麼的解析歧義。"
       },
       "ja": {
         "title": "全ツールに JSON Schema を定義",

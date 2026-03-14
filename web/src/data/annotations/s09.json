@@ -7,8 +7,8 @@
       "description": "In s04, subagents are ephemeral: spawn, do one task, return result, die. Their knowledge dies with them. In s09, teammates are persistent threads with identity (name, role) and config files. A teammate can complete task A, then be assigned task B, carrying forward everything it learned. Persistent teammates accumulate project knowledge, understand established patterns, and don't need to re-read the same files for every task.",
       "alternatives": "One-shot subagents (s04 style) are simpler and provide perfect context isolation -- no risk of one task's context polluting another. But the re-learning cost is high: every new task starts from zero. A middle ground (subagents with shared memory/knowledge base) was considered but adds complexity without the full benefit of persistent identity and state.",
       "zh": {
-        "title": "持久化队友 vs 一次性子智能体",
-        "description": "在 s04 中，子智能体是临时的：创建、执行一个任务、返回结果、销毁。它们的知识随之消亡。在 s09 中，队友是具有身份（名称、角色）和配置文件的持久化线程。队友可以完成任务 A，然后被分配任务 B，并携带之前学到的所有知识。持久化队友积累项目知识，理解已建立的模式，不需要为每个任务重新阅读相同的文件。"
+        "title": "持久化隊友 vs 一次性子智慧體",
+        "description": "在 s04 中，子智慧體是臨時的：建立、執行一個任務、回傳結果、銷毀。它們的知識隨之消亡。在 s09 中，隊友是具有身分（名稱、角色）和設定檔的持久化執行緒。隊友可以完成任務 A，然後被分配任務 B，並攜帶之前學到的所有知識。持久化隊友累積專案知識，理解已建立的模式，不需要為每個任務重新閱讀相同的檔案。"
       },
       "ja": {
         "title": "永続的なチームメイト vs 使い捨てサブエージェント",
@@ -21,8 +21,8 @@
       "description": "Team structure (member names, roles, agent IDs) is stored in a JSON config file, not in any agent's memory. Any agent can discover its teammates by reading the config file -- no need for a discovery service or shared memory. If an agent crashes and restarts, it reads the config to find out who else is on the team. This is consistent with the s07 philosophy: the filesystem is the coordination layer.",
       "alternatives": "In-memory team registries are faster but don't survive process restarts and require a central process to maintain. Service discovery (like DNS or a discovery server) is more robust at scale but overkill for a local multi-agent system. File-based config is the simplest approach that works across independent processes.",
       "zh": {
-        "title": "团队配置持久化到 .teams/{name}/config.json",
-        "description": "团队结构（成员名称、角色、agent ID）存储在 JSON 配置文件中，而非任何 agent 的内存中。任何 agent 都可以通过读取配置文件发现队友——无需发现服务或共享内存。如果 agent 崩溃并重启，它读取配置即可知道团队中还有谁。这与 s07 的理念一致：文件系统就是协调层。配置文件人类可读，便于手动添加或移除团队成员、调试团队配置问题。"
+        "title": "團隊設定持久化到 .teams/{name}/config.json",
+        "description": "團隊結構（成員名稱、角色、agent ID）儲存在 JSON 設定檔中，而非任何 agent 的記憶體中。任何 agent 都可以透過讀取設定檔發現隊友——無需發現服務或共享記憶體。如果 agent 崩潰並重啟，它讀取設定即可知道團隊中還有誰。這與 s07 的理念一致：檔案系統就是協調層。設定檔人類可讀，便於手動添加或移除團隊成員、除錯團隊設定問題。"
       },
       "ja": {
         "title": "チーム設定を .teams/{name}/config.json に永続化",
@@ -35,8 +35,8 @@
       "description": "The team lead receives ALL_TOOLS (including spawn, send, read_inbox, etc.) while teammates receive TEAMMATE_TOOLS (a reduced set focused on task execution). This enforces a clear separation of concerns: teammates focus on doing work (coding, testing, researching), while the lead focuses on coordination (creating tasks, assigning work, managing communication). Giving teammates coordination tools would let them create their own sub-teams or reassign tasks, undermining the lead's ability to maintain a coherent plan.",
       "alternatives": "Giving all agents identical tools is simpler and more egalitarian, but in practice leads to coordination chaos -- multiple agents trying to manage each other, creating conflicting task assignments. Static role-based filtering is predictable and easy to reason about.",
       "zh": {
-        "title": "队友获得工具子集，组长获得全部工具",
-        "description": "团队组长获得 ALL_TOOLS（包括 spawn、send、read_inbox 等），而队友获得 TEAMMATE_TOOLS（专注于任务执行的精简工具集）。这强制了清晰的职责分离：队友专注于做事（编码、测试、研究），组长专注于协调（创建任务、分配工作、管理沟通）。给队友协调工具会让他们创建自己的子团队或重新分配任务，破坏组长维持连贯计划的能力。"
+        "title": "隊友取得工具子集，組長取得全部工具",
+        "description": "團隊組長取得 ALL_TOOLS（包括 spawn、send、read_inbox 等），而隊友取得 TEAMMATE_TOOLS（專注於任務執行的精簡工具集）。這強制了清晰的職責分離：隊友專注於做事（編碼、測試、研究），組長專注於協調（建立任務、分配工作、管理溝通）。給隊友協調工具會讓他們建立自己的子團隊或重新分配任務，破壞組長維持連貫計畫的能力。"
       },
       "ja": {
         "title": "チームメイトはツールのサブセット、リーダーは全ツール",
