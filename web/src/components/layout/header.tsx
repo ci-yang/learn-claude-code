@@ -8,10 +8,22 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { key: "timeline", href: "/timeline" },
-  { key: "compare", href: "/compare" },
-  { key: "layers", href: "/layers" },
+  { key: "timeline", href: "/timeline", isNew: false },
+  { key: "compare", href: "/compare", isNew: false },
+  { key: "layers", href: "/layers", isNew: false },
+  { key: "cheatsheet", href: "/cheatsheet", isNew: true },
+  { key: "tutorial", href: "/tutorial/s01", isNew: true },
+  { key: "playground", href: "/playground", isNew: true },
+  { key: "diff_waterfall", href: "/diff-waterfall", isNew: true },
 ] as const;
+
+function NewBadge() {
+  return (
+    <span className="ml-1 inline-flex items-center rounded-full bg-blue-500 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+      NEW
+    </span>
+  );
+}
 
 const LOCALES = [
   { code: "en", label: "EN" },
@@ -66,6 +78,7 @@ export function Header() {
               )}
             >
               {t(item.key)}
+              {item.isNew && <NewBadge />}
             </Link>
           ))}
 
@@ -124,6 +137,7 @@ export function Header() {
               onClick={() => setMobileOpen(false)}
             >
               {t(item.key)}
+              {item.isNew && <NewBadge />}
             </Link>
           ))}
           <div className="mt-3 flex items-center justify-between border-t border-[var(--color-border)] pt-3">

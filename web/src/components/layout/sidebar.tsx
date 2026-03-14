@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LAYERS, VERSION_META } from "@/lib/constants";
 import { useTranslations } from "@/lib/i18n";
+import { useQuizProgress } from "@/hooks/useQuizProgress";
 import { cn } from "@/lib/utils";
 
 const LAYER_DOT_BG: Record<string, string> = {
@@ -19,10 +20,33 @@ export function Sidebar() {
   const locale = pathname.split("/")[1] || "en";
   const t = useTranslations("sessions");
   const tLayer = useTranslations("layer_labels");
+  const { progress, getOverallPercentage, getTotalCompleted } = useQuizProgress();
+
+  const overallPct = getOverallPercentage();
+  const completedCount = getTotalCompleted();
 
   return (
     <nav className="hidden w-56 shrink-0 md:block">
       <div className="sticky top-[calc(3.5rem+2rem)] space-y-5">
+        {/* Quiz Progress */}
+        {completedCount > 0 && (
+          <div className="space-y-1.5 rounded-lg border border-[var(--color-border)] p-3">
+            <div className="flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
+              <span className="font-medium">
+                測驗進度
+                <span className="ml-1 inline-flex items-center rounded-full bg-blue-500 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">NEW</span>
+              </span>
+              <span>{completedCount}/12</span>
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
+              <div
+                className="h-full rounded-full bg-blue-500 transition-all duration-700"
+                style={{ width: `${overallPct}%` }}
+              />
+            </div>
+          </div>
+        )}
+
         {LAYERS.map((layer) => (
           <div key={layer.id}>
             <div className="flex items-center gap-1.5 pb-1.5">
@@ -45,14 +69,19 @@ export function Sidebar() {
                     <Link
                       href={href}
                       className={cn(
-                        "block rounded-md px-2.5 py-1.5 text-sm transition-colors",
+                        "flex items-center justify-between rounded-md px-2.5 py-1.5 text-sm transition-colors",
                         isActive
                           ? "bg-zinc-100 font-medium text-zinc-900 dark:bg-zinc-800 dark:text-white"
                           : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800/50 dark:hover:text-zinc-300"
                       )}
                     >
-                      <span className="font-mono text-xs">{vId}</span>
-                      <span className="ml-1.5">{t(vId) || meta?.title}</span>
+                      <span>
+                        <span className="font-mono text-xs">{vId}</span>
+                        <span className="ml-1.5">{t(vId) || meta?.title}</span>
+                      </span>
+                      {progress[vId]?.completed && (
+                        <span className="ml-1 text-[10px] text-emerald-500" title="測驗完成">✓</span>
+                      )}
                     </Link>
                   </li>
                 );
