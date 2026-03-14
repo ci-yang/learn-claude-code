@@ -73,6 +73,22 @@ export default async function VersionPage({
         )}
       </header>
 
+      {/* Quiz Link */}
+      <div className="flex items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4">
+        <div className="flex-1">
+          <p className="text-sm font-medium">練習測驗</p>
+          <p className="mt-0.5 text-xs text-[var(--color-text-secondary)]">
+            透過選擇題和填空題測試你對本節的理解
+          </p>
+        </div>
+        <Link
+          href={`/${locale}/quiz/${version}`}
+          className="shrink-0 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+        >
+          開始測驗 →
+        </Link>
+      </div>
+
       {/* Client-rendered interactive sections */}
       <VersionDetailClient
         version={version}
