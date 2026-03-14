@@ -1,0 +1,55 @@
+{
+  "session": "s07",
+  "title": "任務系統（Task System）",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "為什麼「任務狀態存在磁碟的 JSON 檔案」比「任務狀態存在對話歷史中」更可靠？",
+      "options": [
+        "JSON 檔案的讀寫速度比對話歷史查詢更快",
+        "磁碟上的 JSON 檔案不受上下文壓縮（`auto_compact`）影響，Agent 重啟後狀態仍然存在",
+        "JSON 格式比對話歷史更容易被 LLM 理解",
+        "JSON 檔案可以儲存比對話歷史更多的資訊"
+      ],
+      "answer": 1,
+      "explanation": "對話歷史是暫時的：`auto_compact` 壓縮後細節會丟失，Agent 重啟後對話消失。磁碟上的 JSON 檔案是持久的：壓縮不影響磁碟，重啟後仍然存在。這是「外部狀態持久化」vs「對話內狀態」的根本差異——重要的協調狀態必須存在對話之外。"
+    },
+    {
+      "id": "q2",
+      "type": "fill-in",
+      "difficulty": "warm-up",
+      "question": "以下是任務依賴圖的範例，請填入完成 task_003 後的狀態：\n\n**初始狀態：**\n```\ntask_001: {status: \"pending\", blockedBy: [\"002\", \"003\"], blocks: []}\ntask_002: {status: \"completed\", blockedBy: [], blocks: [\"001\"]}\ntask_003: {status: \"in_progress\", blockedBy: [], blocks: [\"001\"]}\n```\n\n完成 task_003 後（呼叫 `_clear_dependency(\"003\")`），task_001 的 `blockedBy` 變為？",
+      "blanks": [
+        {
+          "id": "blank1",
+          "label": "完成 task_003 後，task_001 的 blockedBy 變為",
+          "answer": "[\"002\"]",
+          "hint": "移除了 003 的依賴，但 002 的依賴仍然存在"
+        },
+        {
+          "id": "blank2",
+          "label": "此時 task_001 能開始執行嗎？（能/不能）",
+          "answer": "不能",
+          "hint": "blockedBy 仍不為空"
+        }
+      ],
+      "explanation": "完成 task_003 後，`_clear_dependency(\"003\")` 會從所有任務的 `blockedBy` 中移除 `\"003\"`。task_001 原本的 `blockedBy: [\"002\", \"003\"]` 變為 `blockedBy: [\"002\"]`。由於 `blockedBy` 仍不為空（還在等待 task_002），task_001 **不能**開始執行。只有當 task_002 也完成後，task_001 的 `blockedBy` 才變為空 `[]`，才能開始執行。"
+    },
+    {
+      "id": "q3",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "`update_task` 使用 `addBlockedBy`（追加）而非 `blockedBy`（設定）的原因是？",
+      "options": [
+        "追加操作比設定操作的 API 呼叫更少，效能更好",
+        "防止並發情況下多個代理同時更新同一任務時互相覆蓋彼此的依賴",
+        "`blockedBy` 欄位是唯讀的，不能被設定",
+        "追加操作確保依賴關係永遠不會被刪除"
+      ],
+      "answer": 1,
+      "explanation": "在多代理並發環境中，若代理 A 和代理 B 同時設定 task_001 的 `blockedBy`，後寫入的代理會覆蓋先寫入的代理的數據。使用 `addBlockedBy`（追加）是「讀-修改-寫」操作，加上檔案鎖保護，確保每個代理的依賴聲明都被保留，不會互相覆蓋。"
+    }
+  ]
+}

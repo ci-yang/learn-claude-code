@@ -1,0 +1,61 @@
+{
+  "session": "s10",
+  "title": "團隊協議（Team Protocols）",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "`request_id` 在多代理通訊中最主要的作用是什麼？",
+      "options": [
+        "防止重複發送訊息",
+        "配對請求與對應的回應，讓 Lead 知道哪個回應對應哪個請求（尤其在同時發出多個請求時）",
+        "加密訊息內容，防止其他代理讀取",
+        "標識訊息的優先級，高優先級訊息先處理"
+      ],
+      "answer": 1,
+      "explanation": "當 Lead 同時向多個隊友發出請求時，回應會非同步到達，且到達順序不確定。`request_id` 讓每個請求有唯一標識符，回應中攜帶相同的 `request_id`，Lead 就能精確配對「哪個回應對應哪個請求」。沒有 `request_id`，面對多個並發請求時，Lead 無法確定哪個回應是對哪個請求的。"
+    },
+    {
+      "id": "q2",
+      "type": "fill-in",
+      "difficulty": "warm-up",
+      "question": "以下是關閉協議（Shutdown Protocol）的流程，請填入空白處：\n\n```\nLead 發出請求：\n  shutdown_requests[\"abc123\"] = {target: \"alice\", status: ___}  (1)\n\nLead 收到回應後：\n  回應中的 request_id 應為：___  (2)\n  更新狀態：shutdown_requests[\"abc123\"][\"status\"] = ___  (3)\n```",
+      "blanks": [
+        {
+          "id": "blank1",
+          "label": "(1) 請求初始 status",
+          "answer": "pending",
+          "hint": "請求剛發出，尚未收到回應"
+        },
+        {
+          "id": "blank2",
+          "label": "(2) 回應中的 request_id",
+          "answer": "abc123",
+          "hint": "回應需要攜帶原始請求的 ID"
+        },
+        {
+          "id": "blank3",
+          "label": "(3) 收到回應後的 status",
+          "answer": "approved",
+          "hint": "Alice 同意了關閉請求"
+        }
+      ],
+      "explanation": "關閉協議流程：(1) Lead 建立請求時，初始 status 為 `\"pending\"`，表示等待回應。(2) Alice 回應時，必須在訊息中包含原始的 `request_id`（`\"abc123\"`），Lead 才能配對。(3) 收到 `approved: true` 的回應後，Lead 將 status 更新為 `\"approved\"`，表示協議完成，可以執行關閉動作。"
+    },
+    {
+      "id": "q3",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "為什麼兩個追蹤字典（`shutdown_requests` 和 `plan_requests`）共用同一個 `_tracker_lock`，而不是各自有一個鎖？",
+      "options": [
+        "因為同一時間只有一個追蹤字典會被更新，所以共用鎖不影響效能",
+        "減少死鎖風險：若兩個字典各有自己的鎖，可能出現執行緒 A 持有鎖 1 等待鎖 2、執行緒 B 持有鎖 2 等待鎖 1 的死鎖情況",
+        "Python 的 `threading.Lock()` 只能保護一個物件，所以需要共用",
+        "兩個追蹤字典在程式碼中總是一起被讀寫，所以共用鎖更方便"
+      ],
+      "answer": 1,
+      "explanation": "這是防止「死鎖（Deadlock）」的設計。若 `shutdown_requests` 和 `plan_requests` 各有一個鎖，可能發生：執行緒 A 持有鎖 A 並等待鎖 B，執行緒 B 持有鎖 B 並等待鎖 A——兩個執行緒永遠互相等待，系統卡死。使用一個共用鎖，任何時間只有一個執行緒能修改任何追蹤字典，從根本上消除了這種死鎖場景。"
+    }
+  ]
+}

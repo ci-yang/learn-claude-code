@@ -1,0 +1,55 @@
+{
+  "session": "s09",
+  "title": "代理團隊（Agent Teams）",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "以下哪個描述**正確**區分了「子代理（Subagent）」和「隊友（Teammate）」？",
+      "options": [
+        "子代理有自己的收件匣，隊友沒有",
+        "子代理完成即銷毀（用完即丟），隊友持久存在，可以在 idle 狀態等待新訊息",
+        "隊友只能接收廣播訊息，無法接收個人訊息",
+        "子代理使用 JSONL 通訊，隊友使用 Python Queue 通訊"
+      ],
+      "answer": 1,
+      "explanation": "子代理（s04）是「用完即丟」：父代理呼叫 `run_subagent()`，等待完成，取得結果，子代理結束。隊友（s09）是「持久實體」：有自己的收件匣（JSONL 檔案），可以在 idle 狀態等待新任務，處理完一個任務後繼續等待下一個，不需要重新啟動。"
+    },
+    {
+      "id": "q2",
+      "type": "fill-in",
+      "difficulty": "warm-up",
+      "question": "JSONL 收件匣的兩個核心操作如下，請填入空白處：\n\n**傳送（Append-Only）：**\n```python\nwith open(f\"{to}.jsonl\", \"___\") as f:  # (1) 開啟模式\n    f.write(json.dumps(msg) + \"\\n\")\n```\n\n**接收（Drain）：**\n```python\nmessages = [json.loads(line) for line in open(f\"{name}.jsonl\").readlines()]\nopen(f\"{name}.jsonl\", \"___\").close()  # (2) 清空操作的開啟模式\nreturn messages\n```\n\n**(1)** 哪個模式代表追加寫入？\n**(2)** 哪個模式開啟並立即關閉可以清空檔案？",
+      "blanks": [
+        {
+          "id": "blank1",
+          "label": "(1) 追加寫入的開啟模式",
+          "answer": "a",
+          "hint": "append 模式"
+        },
+        {
+          "id": "blank2",
+          "label": "(2) 清空檔案的開啟模式",
+          "answer": "w",
+          "hint": "write 模式會清空現有內容"
+        }
+      ],
+      "explanation": "(1) `\"a\"` 是 append（追加）模式，每次寫入都加在檔案末尾，不覆蓋現有內容。這確保多個代理同時傳送訊息時不會互相覆蓋。\n(2) `\"w\"` 是 write 模式，開啟時會清空文件現有內容。用 `open(path, \"w\").close()` 開啟後立即關閉，效果就是清空文件——這是「Drain」的清空步驟。"
+    },
+    {
+      "id": "q3",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "為什麼用 JSONL 收件匣而非 Python 的 `queue.Queue`？",
+      "options": [
+        "JSONL 讀寫速度比 `queue.Queue` 快 10 倍",
+        "JSONL 是磁碟上的檔案，代理重啟後未讀訊息不會丟失；`queue.Queue` 是記憶體中的資料結構，重啟後清空",
+        "`queue.Queue` 不支援多執行緒環境",
+        "JSONL 格式讓 LLM 能直接讀取，`queue.Queue` 無法讓 LLM 讀取"
+      ],
+      "answer": 1,
+      "explanation": "JSONL 收件匣的核心優勢是**持久性**：磁碟上的檔案在代理崩潰或重啟後仍然存在，未讀訊息不會丟失。`queue.Queue` 是記憶體資料結構，程式一旦重啟，佇列中的訊息就消失了。在多代理系統中，代理可能隨時重啟，持久的訊息佇列確保訊息可靠傳遞。"
+    }
+  ]
+}

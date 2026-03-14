@@ -1,0 +1,67 @@
+{
+  "session": "s03",
+  "title": "進度追蹤（TodoWrite）",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "以下哪個描述正確解釋了「Nag Reminder」的觸發條件？",
+      "options": [
+        "當 `messages` 列表超過 100 條時觸發",
+        "當連續 3 個回合都沒有呼叫 `todo_write` 工具時觸發",
+        "當所有 Todo 項目都處於 `pending` 狀態超過 5 分鐘時觸發",
+        "當使用者超過 30 秒沒有輸入時觸發"
+      ],
+      "answer": 1,
+      "explanation": "Nag Reminder 的觸發條件是「連續 3 個回合（LLM 呼叫）都沒有呼叫 `todo_write` 工具」。系統用 `rounds_since_todo` 計數器追蹤這個狀態。這個設計的目的是提醒 Agent 更新進度，但又不至於在每次工具執行後都打擾它（太頻繁的提醒反而干擾工作流程）。"
+    },
+    {
+      "id": "q2",
+      "type": "fill-in",
+      "difficulty": "warm-up",
+      "question": "`TodoManager.render()` 會產生如下格式的輸出：\n\n```\n[ ] 1. 撰寫測試\n[>] 2. 實作功能\n[x] 3. 更新文件\n```\n\n請填空：\n- `[ ]` 代表什麼狀態？\n- `[>]` 代表什麼狀態？\n- `[x]` 代表什麼狀態？\n- 系統限制最多同時有幾個項目處於 `[>]`（`in_progress`）狀態？",
+      "blanks": [
+        {
+          "id": "blank1",
+          "label": "[ ] 代表狀態",
+          "answer": "pending",
+          "hint": "待辦、尚未開始"
+        },
+        {
+          "id": "blank2",
+          "label": "[>] 代表狀態",
+          "answer": "in_progress",
+          "hint": "進行中"
+        },
+        {
+          "id": "blank3",
+          "label": "[x] 代表狀態",
+          "answer": "completed",
+          "hint": "已完成"
+        },
+        {
+          "id": "blank4",
+          "label": "最多同時有幾個 in_progress 項目",
+          "answer": "1",
+          "hint": "強迫 Agent 聚焦"
+        }
+      ],
+      "explanation": "三種狀態符號：`[ ]` = pending（待辦）、`[>]` = in_progress（進行中）、`[x]` = completed（已完成）。系統限制最多同時有 **1** 個項目處於 `in_progress` 狀態，這個限制強迫 Agent 聚焦，一次只能「宣告」一件事在進行中。"
+    },
+    {
+      "id": "q3",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "關於 Nag Reminder 的實作，以下哪個描述是正確的？",
+      "options": [
+        "`results.append(reminder)` — 提醒被加在工具結果的最後面",
+        "`results.insert(0, reminder)` — 提醒被插在工具結果的最前面",
+        "提醒被直接加入 `system` 提示，而非 `messages`",
+        "提醒作為獨立的 `assistant` 訊息插入 `messages`"
+      ],
+      "answer": 1,
+      "explanation": "Nag Reminder 使用 `results.insert(0, reminder)` 插入在工具結果的**最前面**。這確保提醒是 LLM 在這一輪看到的第一件事，優先級高於其他工具結果。如果用 `append` 加在最後，提醒可能被大量工具輸出淹沒，LLM 注意到的機率降低。"
+    }
+  ]
+}

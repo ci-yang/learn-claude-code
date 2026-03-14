@@ -1,0 +1,61 @@
+{
+  "session": "s11",
+  "title": "自治代理（Autonomous Agents）",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "以下哪個描述正確解釋了「身份重注入（Identity Re-injection）」的必要性？",
+      "options": [
+        "每次 LLM 呼叫都需要重新告訴模型它的角色，因為 LLM 沒有記憶",
+        "`auto_compact` 壓縮後，早期對話中的身份資訊可能丟失，代理可能「忘記自己是誰」，重注入確保壓縮後代理仍知道自己的角色",
+        "新版本的 Anthropic API 不支援持久的系統提示，必須在每次呼叫時重新注入",
+        "身份資訊是敏感資料，每次注入後會被立即加密，下次需要解密重注入"
+      ],
+      "answer": 1,
+      "explanation": "`auto_compact` 是有損壓縮——它用摘要替換早期對話。如果代理的名稱、角色、能力等身份資訊只在早期對話中提到，壓縮後這些資訊就丟失了，代理可能「忘記」自己的角色和職責。身份重注入（在壓縮後的訊息中再次加入身份資訊）確保代理即使在壓縮後也清楚知道自己是誰。"
+    },
+    {
+      "id": "q2",
+      "type": "fill-in",
+      "difficulty": "warm-up",
+      "question": "以下是自治代理的生命週期狀態機，請填入狀態名稱：\n\n```\n（執行任務）                    （無事可做）\n    ___    ←──────────────────    ___\n    (1)    有訊息 or 認領到任務    (2)\n```\n\n若 `POLL_INTERVAL=5` 秒，`IDLE_TIMEOUT=60` 秒，則最多輪詢幾次（(3)）？",
+      "blanks": [
+        {
+          "id": "blank1",
+          "label": "(1) 執行任務的狀態名稱",
+          "answer": "WORK",
+          "hint": "代理正在執行任務的狀態"
+        },
+        {
+          "id": "blank2",
+          "label": "(2) 無事可做的狀態名稱",
+          "answer": "IDLE",
+          "hint": "代理閒置等待的狀態"
+        },
+        {
+          "id": "blank3",
+          "label": "(3) 最多輪詢幾次",
+          "answer": "12",
+          "hint": "IDLE_TIMEOUT / POLL_INTERVAL = 60 / 5 = ?"
+        }
+      ],
+      "explanation": "自治代理的狀態機：`WORK`（執行任務）↔ `IDLE`（閒置等待）。當代理在 IDLE 狀態發現有訊息或認領到任務時，轉回 WORK。若在 IDLE 狀態輪詢超過 `IDLE_TIMEOUT / POLL_INTERVAL = 60 / 5 = 12` 次仍無工作，執行緒結束（shutdown）。這個設計讓代理能「自我管理」生命週期。"
+    },
+    {
+      "id": "q3",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "`claim_task()` 函式為什麼需要 `_claim_lock`？",
+      "options": [
+        "讀取 JSON 檔案的操作是 I/O 密集型，需要鎖來提升效能",
+        "確保「讀取狀態 → 檢查是否可認領 → 寫入認領結果」這三步是原子操作，防止兩個代理同時認領同一個任務",
+        "Python 的 `json.loads()` 函式不是執行緒安全的，需要鎖保護",
+        "防止多個代理同時建立新任務（避免 ID 衝突）"
+      ],
+      "answer": 1,
+      "explanation": "「讀取 → 檢查 → 寫入」本質上是 「Check-Then-Act」模式，不是原子操作。沒有鎖的情況下，代理 A 讀取任務狀態發現是 `pending`（可認領），在它寫入 `claimed` 之前，代理 B 也讀取到 `pending` 並寫入 `claimed`——結果兩個代理都認領了同一個任務。`_claim_lock` 確保這三步作為一個整體，在同一時間只有一個代理能執行。"
+    }
+  ]
+}

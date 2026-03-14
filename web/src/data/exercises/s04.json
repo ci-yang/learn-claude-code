@@ -1,0 +1,55 @@
+{
+  "session": "s04",
+  "title": "子代理（Subagent）",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "以下關於子代理（Subagent）的描述，哪一個是**錯誤**的？",
+      "options": [
+        "子代理從空的 `messages=[]` 開始，不繼承父代理的對話歷史",
+        "子代理完成後，父代理會收到子代理的完整對話紀錄",
+        "子代理沒有 `task` 工具，不能再啟動孫代理",
+        "子代理和父代理共享同一個 `WORKDIR` 檔案系統"
+      ],
+      "answer": 1,
+      "explanation": "子代理完成後，父代理只收到**摘要**，而非完整對話紀錄。完整對話可能有數十條訊息，傳回父代理會佔用大量上下文。摘要模式讓父代理只看到「任務結果」，保持上下文清潔。子代理從全新的 `messages=[]` 開始，使用子工具集（無 `task` 工具），並共享同一個 `WORKDIR` 檔案系統。"
+    },
+    {
+      "id": "q2",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "子代理使用 `for _ in range(30)` 而非父代理的 `while True`，主要原因是？",
+      "options": [
+        "`for` 迴圈比 `while True` 執行速度更快",
+        "子代理的步數限制作為安全閥，防止父代理無限等待陷入無限迴圈的子代理",
+        "`while True` 在 Python 中不支援在執行緒中使用",
+        "子代理的任務通常比父代理簡單，不需要那麼多步驟"
+      ],
+      "answer": 1,
+      "explanation": "步數上限（`range(30)`）作為安全閥：如果子代理陷入無限迴圈，父代理會一直等待。有了上限，子代理最多執行 30 步後就會終止，父代理不會無限等待。這是「防禦性設計」——父代理對子代理的信任是有限度的。"
+    },
+    {
+      "id": "q3",
+      "type": "fill-in",
+      "difficulty": "warm-up",
+      "question": "以下是 `run_subagent()` 的核心邏輯，請填入空白處：\n\n```python\ndef run_subagent(prompt: str) -> str:\n    # 子代理從「全新」的上下文開始\n    sub_messages = [{\"role\": \"user\", \"content\": ___}]  # (1)\n\n    for _ in range(30):\n        response = client.messages.create(\n            model=MODEL,\n            system=SYSTEM,\n            tools=___,  # (2) 使用哪個工具集？\n            messages=sub_messages,\n        )\n```\n\n**(1)** `sub_messages` 的初始內容是什麼？\n**(2)** 子代理使用哪個工具集（相對於父代理的 `TOOLS`）？",
+      "blanks": [
+        {
+          "id": "blank1",
+          "label": "(1) sub_messages 的初始 content",
+          "answer": "prompt",
+          "hint": "子代理的初始任務來自呼叫者傳入的參數"
+        },
+        {
+          "id": "blank2",
+          "label": "(2) 子代理使用的工具集",
+          "answer": "SUB_TOOLS",
+          "hint": "子代理使用不含 task 工具的子工具集"
+        }
+      ],
+      "explanation": "(1) 子代理從全新的上下文開始，初始訊息就是傳入的 `prompt`——即父代理給予的子任務描述。\n(2) 子代理使用 `SUB_TOOLS`（子工具集），而非父代理的 `TOOLS`。子工具集不包含 `task` 工具，這防止了孫代理的無限遞迴生成（子代理不能再生成子代理）。"
+    }
+  ]
+}

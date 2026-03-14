@@ -1,0 +1,55 @@
+{
+  "session": "s12",
+  "title": "工作樹任務隔離（Worktree Task Isolation）",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "在多代理場景中，為什麼 Git worktree 比「每個代理切換到不同的 branch」更適合？",
+      "options": [
+        "Git worktree 的執行速度比切換 branch 快 100 倍",
+        "Worktree 為每個任務建立獨立的目錄，多個代理可以同時在各自目錄工作，完全不互相干擾；切換 branch 在同一目錄進行，多代理會互相覆蓋",
+        "Worktree 允許在不同的作業系統上工作，切換 branch 只在同一系統",
+        "Worktree 不需要 Git 版本控制，而切換 branch 需要"
+      ],
+      "answer": 1,
+      "explanation": "Git worktree 的核心優勢是**目錄隔離**：每個 worktree 有獨立的工作目錄，代理 A 在 `.wt/task-001/` 工作，代理 B 在 `.wt/task-002/` 工作，兩者完全不干擾。切換 branch 在同一個目錄進行，若代理 A 在 `feature-a` branch，代理 B 切換到 `feature-b` branch，會修改代理 A 的工作環境——多代理場景下完全不可行。"
+    },
+    {
+      "id": "q2",
+      "type": "fill-in",
+      "difficulty": "warm-up",
+      "question": "以下是控制面和執行面的對應關係，請填入空白處：\n\n```\n控制面（.tasks/）                      執行面（.worktrees/）\ntask_001.json:                         index.json:\n  subject: \"Auth refactor\"               {name: \"auth-worker\",\n  status: \"in_progress\"                   task_id: \"___\",      (1)\n  worktree: \"auth-worker\"   ─────►        path: \".wt/auth-worker\"}\n```\n\n**(1)** index.json 中的 task_id 應對應哪個值？\n**(2)** `.wt/auth-worker/` 是什麼？（一句話說明）",
+      "blanks": [
+        {
+          "id": "blank1",
+          "label": "(1) index.json 中的 task_id",
+          "answer": "task_001",
+          "hint": "worktree 需要知道它對應的是哪個任務"
+        },
+        {
+          "id": "blank2",
+          "label": "(2) .wt/auth-worker/ 是什麼",
+          "answer": "實際的 Git worktree 目錄，代理在此目錄中執行工作",
+          "hint": "這是 git worktree 創建的獨立工作目錄"
+        }
+      ],
+      "explanation": "(1) index.json 中的 `task_id` 應為 `\"task_001\"`——這建立了控制面（任務）和執行面（worktree）的雙向關聯：任務知道自己的 worktree，worktree 知道自己的任務。\n(2) `.wt/auth-worker/` 是實際的 Git worktree 目錄，由 `git worktree add` 命令建立，代理在此獨立目錄中讀寫文件、執行命令，不影響其他代理的工作目錄。"
+    },
+    {
+      "id": "q3",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "以下哪個描述正確說明了 `EventBus` 為什麼使用「append-only」設計？",
+      "options": [
+        "Append-only 讓事件日誌能被多個代理同時讀取",
+        "不可篡改的事件歷史記錄，讓開發者能事後重建系統在任意時間點的完整狀態；修改或刪除事件會失去可信度",
+        "Append-only 讓日誌佔用的磁碟空間最小",
+        "Append-only 是 Python 檔案 I/O 的預設模式，不需要特別設定"
+      ],
+      "answer": 1,
+      "explanation": "`EventBus` 使用 append-only 的原因是**不可篡改性（Immutability）**：每個事件都是歷史記錄，一旦發生就不能修改或刪除。這讓系統具有「可觀測性」——開發者可以事後回放事件日誌，重建任意時間點的系統狀態，進行除錯或分析。若允許修改事件，就失去了這個能力，也失去了事件作為「真實發生事實」的可信度。"
+    }
+  ]
+}

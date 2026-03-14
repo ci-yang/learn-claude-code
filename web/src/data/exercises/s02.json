@@ -1,0 +1,55 @@
+{
+  "session": "s02",
+  "title": "工具使用（Tool Use）",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "`safe_path()` 函式的主要目的是什麼？",
+      "options": [
+        "確保檔案路徑存在（檔案實際存在於磁碟上）",
+        "確保路徑解析後仍在工作目錄（`WORKDIR`）範圍內，防止路徑穿越攻擊",
+        "確保路徑使用正斜線（`/`）而非反斜線（`\\`）",
+        "確保路徑長度不超過作業系統的限制"
+      ],
+      "answer": 1,
+      "explanation": "`safe_path()` 的核心是兩步操作：\n1. `(WORKDIR / p).resolve()`：將路徑中的 `..`、symlink 等全部解析為絕對路徑\n2. `.is_relative_to(WORKDIR)`：確認解析後的路徑仍在 `WORKDIR` 範圍內\n\n這防止了路徑穿越攻擊（Path Traversal Attack），例如 `../../etc/passwd` 會被 `.resolve()` 解析為 `/etc/passwd`，然後被 `.is_relative_to()` 拒絕。"
+    },
+    {
+      "id": "q2",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "關於分發映射（Dispatch Map）和 `if/elif` 鏈，以下哪個陳述是**不正確**的？",
+      "options": [
+        "使用分發映射時，新增一個工具只需在字典加一行，不需修改 `agent_loop()`",
+        "使用分發映射讓每個工具函式可以獨立進行單元測試",
+        "分發映射比 `if/elif` 在執行速度上有顯著的效能優勢，因此應該總是使用分發映射",
+        "分發映射是「資料驅動路由」，`if/elif` 是「程式碼邏輯判斷」"
+      ],
+      "answer": 2,
+      "explanation": "分發映射（字典查表）和 `if/elif` 鏈在執行速度上的差異對大多數場景可以忽略不計，選擇分發映射的主要原因是**可維護性**（新增工具不需修改主邏輯）和**可測試性**（每個工具函式可獨立測試），而不是效能優勢。"
+    },
+    {
+      "id": "q3",
+      "type": "fill-in",
+      "difficulty": "warm-up",
+      "question": "以下是 `agent_loop()` 中工具分發的核心一行程式碼，請填入空白處：\n\n```python\nfor block in response.content:\n    if block.type == \"tool_use\":\n        handler = TOOL_HANDLERS.get(___)\n        if handler:\n            result = handler(___block.input)\n        else:\n            result = f\"Unknown tool: {block.name}\"\n```\n\n**(1)** `TOOL_HANDLERS.get(___)` 應填入什麼？\n**(2)** `handler(___block.input)` 中的 `___` 應填入什麼符號，代表什麼意思？",
+      "blanks": [
+        {
+          "id": "blank1",
+          "label": "(1) TOOL_HANDLERS.get(___)",
+          "answer": "block.name",
+          "hint": "要從字典中查找哪個工具的 handler？"
+        },
+        {
+          "id": "blank2",
+          "label": "(2) handler(___block.input) 的符號",
+          "answer": "**",
+          "hint": "如何將字典展開為具名引數？"
+        }
+      ],
+      "explanation": "(1) `block.name` 是工具的名稱（如 `\"bash\"`、`\"read_file\"`），用來查找對應的 handler。\n(2) `**` 是 keyword argument unpacking 符號。`**block.input` 的意思是：將 `block.input` 字典的所有鍵值對展開為具名引數。例如若 `block.input = {\"path\": \"app.py\"}`，則 `handler(**block.input)` 等同於 `handler(path=\"app.py\")`。"
+    }
+  ]
+}

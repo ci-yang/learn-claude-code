@@ -1,0 +1,55 @@
+{
+  "session": "s08",
+  "title": "背景任務（Background Tasks）",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "「Drain Pattern（排空模式）」選擇在「每次 LLM 呼叫之前」排空通知佇列，而不是在「每次工具執行後立即注入」。以下哪個理由最能說明這個選擇？",
+      "options": [
+        "LLM 呼叫前排空比工具執行後立即注入的程式碼更簡單",
+        "確保 LLM 每次思考時都能一次性看到所有最新的背景任務狀態，避免在工具執行中間插入通知破壞連貫性",
+        "工具執行後立即注入會造成 API 限制（rate limit）問題",
+        "背景執行緒只在 LLM 呼叫時才能寫入通知佇列"
+      ],
+      "answer": 1,
+      "explanation": "在「每次 LLM 呼叫之前」排空確保 LLM 每次思考時都能一次性看到**所有**累積的背景任務通知。若在每次工具執行後立即注入，通知會散落在多個工具結果之間，破壞上下文的連貫性，LLM 難以整體理解當前背景任務狀態。"
+    },
+    {
+      "id": "q2",
+      "type": "fill-in",
+      "difficulty": "warm-up",
+      "question": "以下是 `drain_notifications()` 的實作，請填入空白處：\n\n```python\ndef drain_notifications(self) -> list[dict]:\n    with ___:  # (1) 使用什麼？\n        notifs = list(self._notification_queue)  # 複製\n        self._notification_queue.___()            # (2) 清空\n    return notifs\n```\n\n**(1)** 應填入什麼（取得什麼的保護）？\n**(2)** 應呼叫什麼方法清空列表？",
+      "blanks": [
+        {
+          "id": "blank1",
+          "label": "(1) with ___ 使用什麼",
+          "answer": "self._lock",
+          "hint": "需要執行緒鎖來保護共享資源"
+        },
+        {
+          "id": "blank2",
+          "label": "(2) 清空列表的方法",
+          "answer": "clear",
+          "hint": "Python list 的清空方法"
+        }
+      ],
+      "explanation": "(1) 使用 `self._lock`（`threading.Lock()`）保護對 `_notification_queue` 的讀寫，防止背景執行緒在我們讀取的同時寫入，造成資料競爭。\n(2) `list.clear()` 清空列表。先用 `list(...)` 複製再 `clear()` 的原因：若直接回傳原始列表，呼叫者持有的引用會指向清空後的空列表；先複製確保回傳的是完整的通知快照。"
+    },
+    {
+      "id": "q3",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "`daemon=True` 的語義是什麼？",
+      "options": [
+        "守護執行緒具有比一般執行緒更高的執行優先級",
+        "主程式退出時，所有守護執行緒自動終止，不等待它們完成",
+        "守護執行緒無法被 `threading.Lock()` 保護",
+        "守護執行緒在背景隱藏執行，使用者無法查看其狀態"
+      ],
+      "answer": 1,
+      "explanation": "`daemon=True` 讓執行緒成為「守護執行緒」：主程式（主執行緒）退出時，所有守護執行緒會自動終止，不等待它們完成。這對背景任務很重要——若不設定 `daemon=True`，即使主邏輯結束，Python 程式也會繼續等待背景執行緒完成，造成程式無法正常退出。"
+    }
+  ]
+}

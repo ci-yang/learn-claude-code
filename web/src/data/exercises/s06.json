@@ -1,0 +1,67 @@
+{
+  "session": "s06",
+  "title": "上下文壓縮（Context Compact）",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "`micro_compact()` 和 `auto_compact()` 的根本差異是什麼？",
+      "options": [
+        "`micro_compact()` 需要呼叫 LLM，`auto_compact()` 不需要",
+        "`micro_compact()` 是無損的（只替換舊工具結果為佔位符），`auto_compact()` 是有損的（用 LLM 生成摘要替換全部對話）",
+        "`micro_compact()` 處理文字訊息，`auto_compact()` 處理工具結果",
+        "`micro_compact()` 在上下文超過閾值時觸發，`auto_compact()` 每次都執行"
+      ],
+      "answer": 1,
+      "explanation": "`micro_compact()` 是**無損**壓縮：只將舊的工具結果替換為佔位符 `\"[compacted]\"`，不丟失訊息結構。`auto_compact()` 是**有損**壓縮：呼叫 LLM 生成整個對話的摘要，用摘要替換全部對話——訊息細節會丟失，但大幅縮減上下文大小。"
+    },
+    {
+      "id": "q2",
+      "type": "fill-in",
+      "difficulty": "warm-up",
+      "question": "以下是 `auto_compact()` 的三個步驟，請填入每個步驟的動作：\n\n```\n步驟 1（可追溯性）：___\n步驟 2（摘要生成）：___\n步驟 3（就地替換）：messages[:] = [摘要訊息, 確認訊息]\n```\n\n另外，`messages[:] = new_messages` 和 `messages = new_messages` 的差異：\n- `messages[:]`：修改___的內容（呼叫者能看到變化）\n- `messages = `：建立___的列表物件（呼叫者看不到變化）",
+      "blanks": [
+        {
+          "id": "blank1",
+          "label": "步驟 1 的動作",
+          "answer": "將現有對話儲存到磁碟歸檔",
+          "hint": "壓縮前先保存，確保可追溯"
+        },
+        {
+          "id": "blank2",
+          "label": "步驟 2 的動作",
+          "answer": "呼叫 LLM 生成對話摘要",
+          "hint": "有損壓縮的核心步驟"
+        },
+        {
+          "id": "blank3",
+          "label": "messages[:] 修改___的內容",
+          "answer": "同一個物件",
+          "hint": "切片賦值修改的是原始物件"
+        },
+        {
+          "id": "blank4",
+          "label": "messages = 建立___的列表物件",
+          "answer": "新",
+          "hint": "重新賦值只是改變了本地變數的指向"
+        }
+      ],
+      "explanation": "`auto_compact()` 三步驟：(1) 歸檔現有對話到磁碟（可追溯性）；(2) 呼叫 LLM 生成摘要（有損壓縮）；(3) 用 `messages[:] = ...` 就地替換。\n\n`messages[:] = new` 與 `messages = new` 的差異：切片賦值修改同一個物件的內容，所有持有該物件引用的地方都能看到變化；重新賦值只讓本地變數指向新物件，呼叫者仍持有舊物件的引用。"
+    },
+    {
+      "id": "q3",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "以下哪個描述正確解釋了 `estimate_tokens()` 的實作方式？",
+      "options": [
+        "使用 Anthropic SDK 提供的官方 tokenizer 精確計算",
+        "用 `len(str(messages)) // 4` 粗略估算（基於英文每 token 約 4 字元的經驗法則）",
+        "呼叫一個輕量的 LLM 端點來計算 token 數量",
+        "直接計算 `messages` 列表中的元素數量"
+      ],
+      "answer": 1,
+      "explanation": "`estimate_tokens()` 使用 `len(str(messages)) // 4` 粗略估算。英文文字中每個 token 平均約 4 個字元，所以字串長度除以 4 是合理的近似。這是一個「足夠好」的估算——精確計算需要呼叫 tokenizer，但對於觸發壓縮的閾值判斷，粗略估算就足夠了。"
+    }
+  ]
+}

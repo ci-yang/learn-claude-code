@@ -1,0 +1,61 @@
+{
+  "session": "s05",
+  "title": "技能載入（Skill Loading）",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "以下關於技能目錄（Layer 1）的描述，哪一個是正確的？",
+      "options": [
+        "Layer 1 包含每個技能的完整內容，讓 LLM 可以立即使用任何技能",
+        "Layer 1 只包含技能的名稱和一行描述，永遠存在於系統提示中",
+        "Layer 1 在每次 LLM 呼叫時動態重新載入",
+        "Layer 1 需要呼叫 `load_skill` 工具才能看到"
+      ],
+      "answer": 1,
+      "explanation": "Layer 1（技能目錄）只包含每個技能的名稱和一行描述，永遠存在於系統提示中。這讓 LLM 知道「有哪些技能可用」，但不佔用大量上下文。當 LLM 需要某個技能時，再透過 `load_skill` 工具觸發 Layer 2（完整技能內容）的載入。"
+    },
+    {
+      "id": "q2",
+      "type": "fill-in",
+      "difficulty": "warm-up",
+      "question": "以下是一個 `SKILL.md` 的內容範例，請填入空白處：\n\n```markdown\n___  # (1) YAML frontmatter 的起始標記\nname: csv-reader\ndescription: Read and analyze CSV files with pandas\ntags: data, analysis\n___  # (2) YAML frontmatter 的結束標記\n\n# CSV 讀取指南\n...\n```\n\n技能目錄的路徑結構是：`skills/___/SKILL.md`（填入什麼）",
+      "blanks": [
+        {
+          "id": "blank1",
+          "label": "(1) YAML frontmatter 起始標記",
+          "answer": "---",
+          "hint": "YAML frontmatter 的標準格式"
+        },
+        {
+          "id": "blank2",
+          "label": "(2) YAML frontmatter 結束標記",
+          "answer": "---",
+          "hint": "與起始標記相同"
+        },
+        {
+          "id": "blank3",
+          "label": "路徑中 skills/___ /SKILL.md 填入什麼",
+          "answer": "{name}",
+          "hint": "以技能名稱為目錄名"
+        }
+      ],
+      "explanation": "YAML frontmatter 使用 `---` 作為起始和結束標記，這是 Markdown 檔案中嵌入 YAML 元資料的標準格式。技能目錄路徑結構為 `skills/{name}/SKILL.md`，其中 `{name}` 是技能名稱（如 `skills/csv-reader/SKILL.md`）。"
+    },
+    {
+      "id": "q3",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "以下哪個描述正確解釋了 `get_content(name)` 回傳的格式？",
+      "options": [
+        "直接回傳 SKILL.md 的原始內容（包含 frontmatter）",
+        "回傳 `<skill name=\"{name}\">{正文內容}</skill>` 的 XML 格式",
+        "回傳 YAML 字典格式，包含 `name`、`description`、`content` 三個欄位",
+        "回傳 Base64 編碼的技能內容，以節省 token 消耗"
+      ],
+      "answer": 1,
+      "explanation": "`get_content(name)` 回傳 `<skill name=\"{name}\">{正文內容}</skill>` 的 XML 格式。XML 標籤讓 LLM 清楚知道技能內容的邊界，且 `name` 屬性讓 LLM 知道這是哪個技能。正文內容不含 frontmatter（frontmatter 只是 Layer 1 目錄用的元資料）。"
+    }
+  ]
+}

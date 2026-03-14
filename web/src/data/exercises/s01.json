@@ -1,0 +1,55 @@
+{
+  "session": "s01",
+  "title": "代理迴圈（Agent Loop）",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "在 `agent_loop()` 中，迴圈的**唯一退出條件**是什麼？",
+      "options": [
+        "使用者按下 Ctrl+C",
+        "`response.stop_reason != \"tool_use\"`",
+        "迴圈執行超過 100 次",
+        "`messages` 列表長度超過限制"
+      ],
+      "answer": 1,
+      "explanation": "`response.stop_reason != \"tool_use\"` 是迴圈的唯一退出條件。當 LLM 回應 `end_turn` 時，表示它認為任務已完成，不再需要使用工具。`while True` 搭配 `return` 的設計讓終止完全由 LLM 的 `stop_reason` 決定，而非人工設定的計數器。"
+    },
+    {
+      "id": "q2",
+      "type": "single",
+      "difficulty": "warm-up",
+      "question": "以下哪個描述正確解釋了 `tool_result` 為何要以 `role: \"user\"` 回傳？",
+      "options": [
+        "因為 `tool_result` 是使用者輸入的一部分，語意上代表「使用者環境的回傳」",
+        "因為 Anthropic API 只支援 `user` 和 `assistant` 兩種角色",
+        "因為用 `assistant` 角色回傳會讓 LLM 混淆",
+        "因為 `user` 角色的訊息比 `assistant` 角色的訊息優先處理"
+      ],
+      "answer": 0,
+      "explanation": "這是 Anthropic API 的規範。`tool_result` 的語義是「工具執行的結果，由外部環境（使用者端）回傳給模型」。從 LLM 的視角來看，工具的執行是在「使用者那邊」發生的，因此結果應由 `user` 角色回傳。這也是最清晰的語意設計——`assistant` 提出動作需求，`user`（環境）回報執行結果。"
+    },
+    {
+      "id": "q3",
+      "type": "fill-in",
+      "difficulty": "warm-up",
+      "question": "閱讀以下程式碼片段，填入空白處：\n\n```python\nwhile True:\n    response = client.messages.create(\n        model=MODEL,\n        max_tokens=8096,\n        system=SYSTEM,\n        tools=TOOLS,\n        messages=messages,\n    )\n    messages.append({\"role\": \"assistant\", \"content\": response.content})\n\n    if response.stop_reason != \"tool_use\":\n        ___  # (1) 此處應填寫什麼指令？\n\n    results = []\n    for block in response.content:\n        if block.type == \"tool_use\":\n            out = run_bash(block.input[\"command\"])\n            results.append({\n                \"type\": \"tool_result\",\n                \"tool_use_id\": block.id,\n                \"content\": out,\n            })\n\n    messages.append({\"role\": \"___\", \"content\": results})  # (2) 填入角色名稱\n```\n\n**(1)** 空白處應填入什麼指令？\n**(2)** 空白處應填入什麼角色名稱？",
+      "blanks": [
+        {
+          "id": "blank1",
+          "label": "(1) if response.stop_reason != \"tool_use\": ___",
+          "answer": "return",
+          "hint": "當任務完成時，函式應該如何退出？"
+        },
+        {
+          "id": "blank2",
+          "label": "(2) messages.append({\"role\": \"___\", \"content\": results})",
+          "answer": "user",
+          "hint": "工具結果應該以哪個角色回傳？"
+        }
+      ],
+      "explanation": "(1) 當 `stop_reason != \"tool_use\"` 時，LLM 已完成任務，迴圈應該退出。`return` 語句在函式中等同於「退出迴圈並結束函式」。\n(2) 工具結果（`tool_result`）必須以 `user` 角色追加到 `messages`，這是 Anthropic API 的規範，讓 LLM 在下一輪能看到執行結果。"
+    }
+  ]
+}
